@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace SistemaBiblioteca
 {
-    public partial class Form1 : Form
+    public partial class Vista2 : Form
     {
-        public Form1()
+        public Vista2()
         {
             InitializeComponent();
         }
