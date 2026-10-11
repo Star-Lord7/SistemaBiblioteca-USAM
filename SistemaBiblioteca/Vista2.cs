@@ -10,11 +10,21 @@ using System.Windows.Forms;
 
 namespace SistemaBiblioteca
 {
-    public partial class Form1 : Form
+    public partial class Vista2 : Form
     {
-        public Form1()
+        public Vista2()
         {
             InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
