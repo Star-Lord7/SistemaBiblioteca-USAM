@@ -34,18 +34,27 @@ namespace SistemaBiblioteca
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // 1. Crea la instancia de tu nuevo formulario (reemplaza "Form2" con el nombre real de tu form)
-            Vista2 nuevaPantalla = new Vista2();
+            // 1. Crea la instancia de tu menú principal
+            MenuPrincipalForm menu = new MenuPrincipalForm();
 
-            // 2. Configura que al cerrar la nueva pantalla, se cierre toda la aplicación
-            // (Si no agregas esto, tu app quedará ejecutándose invisible en segundo plano)
-            nuevaPantalla.FormClosed += (s, args) => this.Close();
+            // 2. Si se cierra el menú principal, se cierra toda la aplicación
+            menu.FormClosed += (s, args) => this.Close();
 
-            // 3. Muestra la nueva pantalla
-            nuevaPantalla.Show();
+            // 3. Muestra el menú principal
+            menu.Show();
 
-            // 4. Oculta la pantalla actual (Form1)
+            // 4. Oculta el login actual
             this.Hide();
+        }
+
+        private void Vista1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FlowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
