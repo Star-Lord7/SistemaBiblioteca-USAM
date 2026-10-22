@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SistemaBiblioteca.Forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,36 +18,50 @@ namespace SistemaBiblioteca
             InitializeComponent();
         }
 
+        private void AbrirFormulario(Form formularioHijo)
+        {
+            // Eliminar el formulario que se muestra actualmente
+            panelContenido.Controls.Clear();
+
+            // Configurar el nuevo formulario
+            formularioHijo.TopLevel = false;
+            formularioHijo.FormBorderStyle = FormBorderStyle.None;
+            formularioHijo.Dock = DockStyle.Fill;
+
+            // Mostrarlo dentro del panel
+            panelContenido.Controls.Add(formularioHijo);
+            formularioHijo.Show();
+        }
+
+
         // Evento para el botón Inicio
         private void Button1_Click(object sender, EventArgs e)
         {
-            this.BringToFront();
+            AbrirFormulario(new InicioForm());
         }
 
         // Evento para el botón Libros (Abre Vista1)
         private void Button2_Click(object sender, EventArgs e)
         {
-            Vista1 pantallaLibros = new Vista1();
-            pantallaLibros.Show();
+            AbrirFormulario(new LibrosForm());
         }
 
         // Evento para el botón Usuarios (Abre Vista2)
         private void Button3_Click(object sender, EventArgs e)
         {
-            Vista2 pantallaUsuarios = new Vista2();
-            pantallaUsuarios.Show();
+            //AbrirFormulario(new UsuariosForm());
         }
 
         // Evento para el botón Préstamos
         private void Button4_Click(object sender, EventArgs e)
         {
-            // Aquí podrás agregar la pantalla de Préstamos cuando esté lista
+            //  AbrirFormulario(new PrestamosForm());
         }
 
         // Evento para el botón Reportes
         private void Button5_Click(object sender, EventArgs e)
         {
-            // Evento para Reportes
+            // AbrirFormulario(new ReportesForm());
         }
 
         // Evento para el botón Configuración
@@ -77,6 +92,11 @@ namespace SistemaBiblioteca
         private void Label5_Click(object sender, EventArgs e) { }
         private void Label1_Click(object sender, EventArgs e) { }
         private void Label10_Click(object sender, EventArgs e) { }
+
+        private void MenuPrincipalForm_Load(object sender, EventArgs e)
+        {
+            AbrirFormulario(new InicioForm());
+        }
     }
 }
 // Cambios de navegación listos
