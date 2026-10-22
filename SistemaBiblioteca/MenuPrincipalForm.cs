@@ -45,11 +45,11 @@ namespace SistemaBiblioteca
         {
             AbrirFormulario(new LibrosForm());
         }
-
+        
         // Evento para el botón Usuarios (Abre Vista2)
         private void Button3_Click(object sender, EventArgs e)
         {
-            //AbrirFormulario(new UsuariosForm());
+            AbrirFormulario(new Forms.LibrosForm());
         }
 
         // Evento para el botón Préstamos
