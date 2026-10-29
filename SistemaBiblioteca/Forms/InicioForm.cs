@@ -47,5 +47,10 @@ namespace SistemaBiblioteca.Forms
                     MessageBoxIcon.Error);
             }
         }
+
+        private void label10_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
