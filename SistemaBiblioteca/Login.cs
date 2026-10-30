@@ -1,4 +1,7 @@
-﻿using System;
+﻿using SistemaBiblioteca.Models;
+using SistemaBiblioteca.Services;
+using SistemaBiblioteca.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +15,8 @@ namespace SistemaBiblioteca
 {
     public partial class Login : Form
     {
+        private readonly AuthService authService = new AuthService();
+
         public Login()
         {
             InitializeComponent();
@@ -34,17 +39,48 @@ namespace SistemaBiblioteca
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // 1. Crea la instancia de tu menú principal
-            MenuPrincipalForm menu = new MenuPrincipalForm();
+            try
+            {
+                string correo = txtCorreo.Text.Trim();
+                string password = txtPassword.Text;
 
-            // 2. Si se cierra el menú principal, se cierra toda la aplicación
-            menu.FormClosed += (s, args) => this.Close();
+                Usuario usuario = authService.IniciarSesion(
+                    correo,
+                    password);
 
-            // 3. Muestra el menú principal
-            menu.Show();
+                if (usuario == null)
+                {
+                    MessageBox.Show(
+                        "Correo o contraseña incorrectos.",
+                        "Error de autenticación",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
 
-            // 4. Oculta el login actual
-            this.Hide();
+                    return;
+                }
+
+                MessageBox.Show(
+                    "Bienvenido, " + usuario.Nombre,
+                    "Inicio de sesión exitoso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                MenuPrincipalForm menu = new MenuPrincipalForm();
+
+                this.Hide();
+
+                menu.ShowDialog();
+
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private void Vista1_Load(object sender, EventArgs e)

@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Data\ConexionBD.cs" />
     <Compile Include="Data\LibroRepository.cs" />
+    <Compile Include="Data\UsuarioRepository.cs" />
     <Compile Include="Forms\InicioForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,6 +64,18 @@
     <Compile Include="Forms\LibrosForm.Designer.cs">
       <DependentUpon>LibrosForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MenuUsuarioForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuUsuarioForm.Designer.cs">
+      <DependentUpon>MenuUsuarioForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuBibliotecarioForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuBibliotecarioForm.Designer.cs">
+      <DependentUpon>MenuBibliotecarioForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MenuPrincipalForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,8 +86,10 @@
     <Compile Include="Models\Categoria.cs" />
     <Compile Include="Models\Editorial.cs" />
     <Compile Include="Models\Libro.cs" />
+    <Compile Include="Models\Usuario.cs" />
+    <Compile Include="Services\AuthService.cs" />
     <Compile Include="Services\LibroService.cs" />
-    <Compile Include="Styles\Estilos.cs" />
+    <Compile Include="Services\PasswordService.cs" />
     <Compile Include="Login.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,6 +103,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LibrosForm.resx">
       <DependentUpon>LibrosForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuUsuarioForm.resx">
+      <DependentUpon>MenuUsuarioForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuBibliotecarioForm.resx">
+      <DependentUpon>MenuBibliotecarioForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MenuPrincipalForm.resx">
       <DependentUpon>MenuPrincipalForm.cs</DependentUpon>
