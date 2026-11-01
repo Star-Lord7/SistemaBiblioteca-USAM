@@ -36,6 +36,7 @@
             this.txtCorreo = new System.Windows.Forms.TextBox();
             this.txtPassword = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.chkMostrarPassword = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -94,6 +95,7 @@
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.Size = new System.Drawing.Size(291, 22);
             this.txtPassword.TabIndex = 6;
+            this.txtPassword.UseSystemPasswordChar = true;
             // 
             // pictureBox1
             // 
@@ -109,12 +111,24 @@
             this.pictureBox1.WaitOnLoad = true;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
+            // chkMostrarPassword
+            // 
+            this.chkMostrarPassword.AutoSize = true;
+            this.chkMostrarPassword.Location = new System.Drawing.Point(751, 220);
+            this.chkMostrarPassword.Name = "chkMostrarPassword";
+            this.chkMostrarPassword.Size = new System.Drawing.Size(144, 20);
+            this.chkMostrarPassword.TabIndex = 7;
+            this.chkMostrarPassword.Text = "Mostrar contraseña";
+            this.chkMostrarPassword.UseVisualStyleBackColor = true;
+            this.chkMostrarPassword.Click += new System.EventHandler(this.chkMostrarPassword_CheckedChanged);
+            // 
             // Login
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FloralWhite;
             this.ClientSize = new System.Drawing.Size(1236, 712);
+            this.Controls.Add(this.chkMostrarPassword);
             this.Controls.Add(this.txtPassword);
             this.Controls.Add(this.txtCorreo);
             this.Controls.Add(this.label3);
@@ -127,6 +141,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SistemaBiblioteca";
             this.Load += new System.EventHandler(this.Vista1_Load);
+            this.Click += new System.EventHandler(this.chkMostrarPassword_CheckedChanged);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -141,6 +156,7 @@
         private System.Windows.Forms.TextBox txtCorreo;
         private System.Windows.Forms.TextBox txtPassword;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.CheckBox chkMostrarPassword;
     }
 }
 

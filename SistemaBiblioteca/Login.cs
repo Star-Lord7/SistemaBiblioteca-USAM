@@ -59,19 +59,47 @@ namespace SistemaBiblioteca
                     return;
                 }
 
-                MessageBox.Show(
+                Form menu = null;
+
+                switch (usuario.NombreRol)
+                {
+                    case "Administrador":
+                        menu = new MenuPrincipalForm();
+                        break;
+
+                    case "Bibliotecario":
+                        menu = new MenuBibliotecarioForm();
+                        break;
+
+                    case "Usuario":
+                        menu = new MenuUsuarioForm();
+                        break;
+
+                    default:
+                        MessageBox.Show(
+                            "El usuario no tiene un rol válido.",
+                            "Acceso denegado",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+
+                        return;
+                }
+
+                /*MessageBox.Show(
                     "Bienvenido, " + usuario.Nombre,
                     "Inicio de sesión exitoso",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
-                MenuPrincipalForm menu = new MenuPrincipalForm();
+                    MessageBoxIcon.Information);*/
 
                 this.Hide();
 
                 menu.ShowDialog();
 
-                this.Close();
+                txtCorreo.Clear();
+
+                txtPassword.Clear();
+
+                this.Show();
             }
             catch (Exception ex)
             {
@@ -81,6 +109,14 @@ namespace SistemaBiblioteca
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+        }
+
+        private void chkMostrarPassword_CheckedChanged(
+    object sender,
+    EventArgs e)
+        {
+            txtPassword.UseSystemPasswordChar =
+                !chkMostrarPassword.Checked;
         }
 
         private void Vista1_Load(object sender, EventArgs e)

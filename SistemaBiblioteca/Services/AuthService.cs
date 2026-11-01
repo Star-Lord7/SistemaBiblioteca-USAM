@@ -13,47 +13,39 @@ using SistemaBiblioteca.Models;
             private readonly UsuarioRepository usuarioRepository =
                 new UsuarioRepository();
 
-            public Usuario IniciarSesion(string correo, string password)
+        public Usuario IniciarSesion(string correo, string password)
+        {
+            if (string.IsNullOrWhiteSpace(correo) ||
+                string.IsNullOrWhiteSpace(password))
             {
-                if (string.IsNullOrWhiteSpace(correo) ||
-                    string.IsNullOrWhiteSpace(password))
-                {
-                    throw new Exception(
-                        "Debe ingresar su correo y contraseña.");
-                }
-
-                Usuario usuario = usuarioRepository.ObtenerPorCorreo(
-                    correo.Trim());
-
-                if (usuario == null)
-                {
-                    return null;
-                }
-
-                if (!PasswordService.VerificarPassword(
-                    password,
-                    usuario.PasswordHash))
-                {
-                    return null;
-                }
-
-                if (!usuario.Estado)
-                {
-                    throw new Exception(
-                        "La cuenta se encuentra deshabilitada.");
-                }
-
-                // Por ahora solamente permitimos administradores.
-                if (usuario.NombreRol != "Administrador")
-                {
-                    throw new Exception(
-                        "No tiene permisos para ingresar como administrador.");
-                }
-
-                // Evitar conservar el hash en el objeto de sesión.
-                usuario.PasswordHash = null;
-
-                return usuario;
+                throw new Exception(
+                    "Debe ingresar su correo y contraseña.");
             }
+
+            Usuario usuario = usuarioRepository.ObtenerPorCorreo(
+                correo.Trim());
+
+            if (usuario == null)
+            {
+                return null;
+            }
+
+            if (!PasswordService.VerificarPassword(
+                password,
+                usuario.PasswordHash))
+            {
+                return null;
+            }
+
+            if (!usuario.Estado)
+            {
+                throw new Exception(
+                    "La cuenta se encuentra deshabilitada.");
+            }
+
+            usuario.PasswordHash = null;
+
+            return usuario;
         }
+    }
 }
