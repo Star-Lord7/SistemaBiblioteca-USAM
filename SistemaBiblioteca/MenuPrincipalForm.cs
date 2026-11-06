@@ -49,13 +49,13 @@ namespace SistemaBiblioteca
         // Evento para el botón Usuarios (Abre Vista2)
         private void Button3_Click(object sender, EventArgs e)
         {
-            AbrirFormulario(new Forms.LibrosForm());
+            AbrirFormulario(new Vista1());
         }
 
         // Evento para el botón Préstamos
         private void Button4_Click(object sender, EventArgs e)
         {
-            //  AbrirFormulario(new PrestamosForm());
+              AbrirFormulario(new PrestamosForm());
         }
 
         // Evento para el botón Reportes
