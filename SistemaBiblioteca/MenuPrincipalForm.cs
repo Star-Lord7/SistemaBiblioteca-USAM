@@ -40,16 +40,16 @@ namespace SistemaBiblioteca
             AbrirFormulario(new InicioForm());
         }
 
-        // Evento para el botón Libros (Abre Vista1)
+        // Evento para el botón Libros
         private void Button2_Click(object sender, EventArgs e)
         {
             AbrirFormulario(new LibrosForm());
         }
-        
+
         // Evento para el botón Usuarios (Abre Vista2)
         private void Button3_Click(object sender, EventArgs e)
         {
-            AbrirFormulario(new Vista1());
+            //AbrirFormulario(new UsuariosForm());
         }
 
         // Evento para el botón Préstamos

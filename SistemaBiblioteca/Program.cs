@@ -16,7 +16,7 @@ namespace SistemaBiblioteca
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Vista1());
+            Application.Run(new Login());
         }
     }
 }
