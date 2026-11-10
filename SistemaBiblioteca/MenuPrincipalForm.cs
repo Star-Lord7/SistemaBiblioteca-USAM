@@ -96,5 +96,19 @@ namespace SistemaBiblioteca
         {
             AbrirFormulario(new InicioForm());
         }
+
+        private void btnCreditos_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                "SISTEMA DE GESTIÓN DE BIBLIOTECA\n\n" +
+                "Desarrollado por:\n\n" +
+                "• Stephany Lourdes Alvarado Flores - 250736\n" +
+                "• Samuel Isaac Azucena Gómez - 250639\n\n" +
+                "© 2026 - USAM Programación 1",
+                "Créditos del sistema",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
     }
 }
