@@ -33,7 +33,6 @@ namespace SistemaBiblioteca
             formularioHijo.Show();
         }
 
-
         // Evento para el botón Inicio
         private void Button1_Click(object sender, EventArgs e)
         {
@@ -46,16 +45,16 @@ namespace SistemaBiblioteca
             AbrirFormulario(new LibrosForm());
         }
 
-        // Evento para el botón Usuarios (Abre Vista2)
+        // Evento para el botón Usuarios (Corregido para abrir UsuariosForm)
         private void Button3_Click(object sender, EventArgs e)
         {
-            //AbrirFormulario(new UsuariosForm());
+            AbrirFormulario(new UsuariosForm());
         }
 
         // Evento para el botón Préstamos
         private void Button4_Click(object sender, EventArgs e)
         {
-              AbrirFormulario(new PrestamosForm());
+            AbrirFormulario(new PrestamosForm());
         }
 
         // Evento para el botón Reportes
@@ -86,7 +85,7 @@ namespace SistemaBiblioteca
             }
         }
 
-        // Métodos vacíos para resolver los vínculos del Designer y evitar errores CS1061
+        // Métodos auxiliares para los eventos del diseñador
         private void Panel1_Paint(object sender, PaintEventArgs e) { }
         private void Panel4_Paint(object sender, PaintEventArgs e) { }
         private void Label5_Click(object sender, EventArgs e) { }
@@ -99,4 +98,3 @@ namespace SistemaBiblioteca
         }
     }
 }
-// Cambios de navegación listos

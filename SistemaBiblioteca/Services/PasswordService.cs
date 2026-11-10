@@ -44,6 +44,10 @@ namespace SistemaBiblioteca.Services
             if (string.IsNullOrWhiteSpace(passwordHash))
                 return false;
 
+            // Permite validar si coincide directamente en texto plano (para emergencias o datos iniciales)
+            if (password == passwordHash)
+                return true;
+
             try
             {
                 // Separar los componentes del hash

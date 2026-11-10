@@ -1,128 +1,234 @@
-﻿using SistemaBiblioteca.Data;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using SistemaBiblioteca.Data;
 
 namespace SistemaBiblioteca.Forms
 {
-    public class PrestamosForm : Form
+    public partial class PrestamosForm : Form
     {
-        // Controles de Registro
-        private GroupBox grpRegistrar;
-        private Label lblUsuario;
-        private ComboBox cmbUsuarios;
-        private Label lblLibro;
-        private ComboBox cmbLibros;
-        private Label lblFechaPrestamo;
+        private readonly ConexionBD conexionBD = new();
+
+        private ComboBox cmbUsuario;
+        private ComboBox cmbLibro;
         private DateTimePicker dtpFechaPrestamo;
-        private Label lblFechaDevolucion;
         private DateTimePicker dtpFechaDevolucion;
         private Button btnRegistrar;
         private Button btnLimpiar;
 
-        // Controles de Tabla (Préstamos registrados)
-        private Label lblTituloTabla;
+        // Controles para el buscador (Panel derecho)
+        private ComboBox cmbBuscarPor;
+        private TextBox txtBuscar;
+        private Button btnBuscar;
+        private Button btnVerTodos;
+
         private DataGridView dgvPrestamos;
 
         public PrestamosForm()
         {
-            // Configuración principal de la ventana
-            this.Text = "Sistema de Biblioteca - Préstamos";
-            this.Size = new Size(850, 650);
-            this.BackColor = Color.WhiteSmoke;
-            this.StartPosition = FormStartPosition.CenterScreen;
-
-            InicializarControles();
-            CargarUsuarios();
-            CargarLibros();
-            CargarPrestamosRegistrados();
+            ConstruirInterfazPorCodigo();
         }
 
-        private void InicializarControles()
+        private void ConstruirInterfazPorCodigo()
         {
-            // === GRUPO: REGISTRAR PRÉSTAMO ===
-            grpRegistrar = new GroupBox();
-            grpRegistrar.Text = "Registrar préstamo";
-            grpRegistrar.Location = new Point(20, 20);
-            grpRegistrar.Size = new Size(790, 220);
-            this.Controls.Add(grpRegistrar);
+            Text = "Sistema de Biblioteca - Gestión de Préstamos";
+            BackColor = Color.White;
+            Width = 985;
+            Height = 580;
+            StartPosition = FormStartPosition.CenterScreen;
 
-            // Usuario
-            lblUsuario = new Label() { Text = "Usuario:", Location = new Point(20, 35), AutoSize = true };
-            cmbUsuarios = new ComboBox() { Location = new Point(130, 32), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
-            grpRegistrar.Controls.Add(lblUsuario);
-            grpRegistrar.Controls.Add(cmbUsuarios);
+            // ==========================================
+            // PANEL IZQUIERDO: REGISTRAR PRÉSTAMO
+            // ==========================================
+            GroupBox gbRegistrar = new()
+            {
+                Text = "Registrar préstamo",
+                Location = new Point(20, 15),
+                Size = new Size(465, 165),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
+            };
 
-            // Libro
-            lblLibro = new Label() { Text = "Libro:", Location = new Point(20, 75), AutoSize = true };
-            cmbLibros = new ComboBox() { Location = new Point(130, 72), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
-            grpRegistrar.Controls.Add(lblLibro);
-            grpRegistrar.Controls.Add(cmbLibros);
+            Label lblUsuario = new() { Text = "Usuario:", Location = new Point(15, 30), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            cmbUsuario = new() { Location = new Point(130, 27), Width = 315, DropDownStyle = ComboBoxStyle.DropDownList };
 
-            // Fecha Préstamo
-            lblFechaPrestamo = new Label() { Text = "Fecha préstamo:", Location = new Point(420, 35), AutoSize = true };
-            dtpFechaPrestamo = new DateTimePicker() { Location = new Point(540, 32), Width = 220, Format = DateTimePickerFormat.Short };
-            grpRegistrar.Controls.Add(lblFechaPrestamo);
-            grpRegistrar.Controls.Add(dtpFechaPrestamo);
+            Label lblLibro = new() { Text = "Libro:", Location = new Point(15, 67), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            cmbLibro = new() { Location = new Point(130, 64), Width = 315, DropDownStyle = ComboBoxStyle.DropDownList };
 
-            // Fecha Devolución
-            lblFechaDevolucion = new Label() { Text = "Fecha devolución:", Location = new Point(420, 75), AutoSize = true };
-            dtpFechaDevolucion = new DateTimePicker() { Location = new Point(540, 72), Width = 220, Format = DateTimePickerFormat.Short };
-            grpRegistrar.Controls.Add(lblFechaDevolucion);
-            grpRegistrar.Controls.Add(dtpFechaDevolucion);
+            Label lblFPrestamo = new() { Text = "Fecha préstamo:", Location = new Point(15, 102), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            dtpFechaPrestamo = new() { Location = new Point(130, 99), Width = 180, Format = DateTimePickerFormat.Short };
 
-            // Botón Registrar Préstamo
-            btnRegistrar = new Button() { Text = "Registrar préstamo", Location = new Point(130, 135), Width = 150, Height = 35 };
-            btnRegistrar.BackColor = Color.FromArgb(0, 122, 204);
-            btnRegistrar.ForeColor = Color.White;
-            btnRegistrar.FlatStyle = FlatStyle.Flat;
-            btnRegistrar.Click += BtnRegistrar_Click;
-            grpRegistrar.Controls.Add(btnRegistrar);
+            Label lblFDevolucion = new() { Text = "Fecha devolución:", Location = new Point(15, 134), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            dtpFechaDevolucion = new() { Location = new Point(130, 131), Width = 180, Format = DateTimePickerFormat.Short };
 
-            // Botón Limpiar
-            btnLimpiar = new Button() { Text = "Limpiar", Location = new Point(290, 135), Width = 90, Height = 35 };
-            btnLimpiar.BackColor = Color.LightGray;
-            btnLimpiar.FlatStyle = FlatStyle.Flat;
-            btnLimpiar.Click += BtnLimpiar_Click;
-            grpRegistrar.Controls.Add(btnLimpiar);
+            gbRegistrar.Controls.Add(lblUsuario);
+            gbRegistrar.Controls.Add(cmbUsuario);
+            gbRegistrar.Controls.Add(lblLibro);
+            gbRegistrar.Controls.Add(cmbLibro);
+            gbRegistrar.Controls.Add(lblFPrestamo);
+            gbRegistrar.Controls.Add(dtpFechaPrestamo);
+            gbRegistrar.Controls.Add(lblFDevolucion);
+            gbRegistrar.Controls.Add(dtpFechaDevolucion);
 
-            // === SECCIÓN: PRÉSTAMOS REGISTRADOS ===
-            lblTituloTabla = new Label() { Text = "Préstamos registrados", Location = new Point(20, 260), Font = new Font("Segoe UI", 11, FontStyle.Bold), AutoSize = true };
-            this.Controls.Add(lblTituloTabla);
 
-            dgvPrestamos = new DataGridView();
-            dgvPrestamos.Location = new Point(20, 290);
-            dgvPrestamos.Size = new Size(790, 280);
-            dgvPrestamos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvPrestamos.ReadOnly = true;
-            dgvPrestamos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            this.Controls.Add(dgvPrestamos);
+            // ==========================================
+            // PANEL DERECHO: BUSCAR PRÉSTAMO
+            // ==========================================
+            GroupBox gbBuscar = new()
+            {
+                Text = "Buscar préstamo",
+                Location = new Point(500, 15),
+                Size = new Size(445, 165),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
+            };
+
+            Label lblBuscarPor = new() { Text = "Buscar por:", Location = new Point(15, 30), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            cmbBuscarPor = new() { Location = new Point(110, 27), Width = 310, DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbBuscarPor.Items.Add("Usuario");
+            cmbBuscarPor.Items.Add("Libro");
+            cmbBuscarPor.Items.Add("Estado");
+            cmbBuscarPor.SelectedIndex = 0;
+
+            Label lblIngrese = new() { Text = "Filtro:", Location = new Point(15, 70), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            txtBuscar = new() { Location = new Point(110, 67), Width = 310 };
+
+            btnBuscar = new()
+            {
+                Text = "🔍 Buscar",
+                Location = new Point(110, 112),
+                Width = 120,
+                Height = 35,
+                BackColor = Color.FromArgb(0, 120, 215),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnBuscar.Click += btnBuscar_Click;
+
+            btnVerTodos = new()
+            {
+                Text = "Ver todos",
+                Location = new Point(240, 112),
+                Width = 100,
+                Height = 35,
+                FlatStyle = FlatStyle.Standard
+            };
+            btnVerTodos.Click += btnVerTodos_Click;
+
+            gbBuscar.Controls.Add(lblBuscarPor);
+            gbBuscar.Controls.Add(cmbBuscarPor);
+            gbBuscar.Controls.Add(lblIngrese);
+            gbBuscar.Controls.Add(txtBuscar);
+            gbBuscar.Controls.Add(btnBuscar);
+            gbBuscar.Controls.Add(btnVerTodos);
+
+
+            // ==========================================
+            // BOTONES PRINCIPALES DE ACCIÓN
+            // ==========================================
+            btnRegistrar = new()
+            {
+                Text = "Registrar préstamo",
+                Location = new Point(20, 192),
+                Width = 150,
+                Height = 35,
+                BackColor = Color.FromArgb(0, 120, 215),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnRegistrar.Click += btnRegistrar_Click;
+
+            btnLimpiar = new()
+            {
+                Text = "Limpiar",
+                Location = new Point(180, 192),
+                Width = 90,
+                Height = 35,
+                FlatStyle = FlatStyle.Standard
+            };
+            btnLimpiar.Click += btnLimpiar_Click;
+
+
+            // ==========================================
+            // TABLA: PRÉSTAMOS REGISTRADOS
+            // ==========================================
+            Label lblTituloTabla = new()
+            {
+                Text = "Préstamos registrados",
+                Location = new Point(20, 240),
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                AutoSize = true
+            };
+
+            dgvPrestamos = new()
+            {
+                Location = new Point(20, 275),
+                Size = new Size(925, 245),
+                ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            };
+
+            // Aplicar estilo visual moderno a la tabla
+            EstilizarTablaPrestamos();
+
+            // Agregar controles al formulario
+            Controls.Add(gbRegistrar);
+            Controls.Add(gbBuscar);
+            Controls.Add(btnRegistrar);
+            Controls.Add(btnLimpiar);
+            Controls.Add(lblTituloTabla);
+            Controls.Add(dgvPrestamos);
+        }
+
+        private void EstilizarTablaPrestamos()
+        {
+            dgvPrestamos.BackgroundColor = Color.White;
+            dgvPrestamos.BorderStyle = BorderStyle.None;
+            dgvPrestamos.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvPrestamos.RowHeadersVisible = false;
+            dgvPrestamos.AllowUserToAddRows = false;
+
+            // Encabezados en tono azul acorde a la interfaz
+            dgvPrestamos.EnableHeadersVisualStyles = false;
+            dgvPrestamos.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvPrestamos.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(0, 32, 96);
+            dgvPrestamos.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dgvPrestamos.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            dgvPrestamos.ColumnHeadersHeight = 35;
+
+            // Estilos de filas y selección
+            dgvPrestamos.DefaultCellStyle.SelectionBackColor = Color.FromArgb(220, 230, 242);
+            dgvPrestamos.DefaultCellStyle.SelectionForeColor = Color.Black;
+            dgvPrestamos.DefaultCellStyle.Font = new Font("Segoe UI", 9f);
+            dgvPrestamos.RowTemplate.Height = 30;
+        }
+
+        private void PrestamosForm_Load(object sender, EventArgs e)
+        {
+            if (DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+
+            CargarUsuarios();
+            CargarLibros();
+            CargarTablaPrestamos();
         }
 
         private void CargarUsuarios()
         {
             try
             {
-                ConexionBD conexionBD = new ConexionBD();
-                using (SqlConnection conexion = conexionBD.ObtenerConexion())
-                {
-                    string query = "SELECT Id, Nombre FROM Usuarios";
-                    SqlCommand cmd = new SqlCommand(query, conexion);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
+                using SqlConnection conexion = conexionBD.ObtenerConexion();
+                string sql = "SELECT IdUsuario, Nombre + ' ' + ISNULL(Apellido, '') AS NombreCompleto FROM Usuarios";
+                SqlDataAdapter da = new(sql, conexion);
+                DataTable dt = new();
+                da.Fill(dt);
 
-                    cmbUsuarios.DataSource = dt;
-                    cmbUsuarios.DisplayMember = "Nombre";
-                    cmbUsuarios.ValueMember = "Id";
-                }
+                cmbUsuario.DataSource = dt;
+                cmbUsuario.DisplayMember = "NombreCompleto";
+                cmbUsuario.ValueMember = "IdUsuario";
+                cmbUsuario.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
@@ -134,19 +240,16 @@ namespace SistemaBiblioteca.Forms
         {
             try
             {
-                ConexionBD conexionBD = new ConexionBD();
-                using (SqlConnection conexion = conexionBD.ObtenerConexion())
-                {
-                    string query = "SELECT Id, Titulo FROM Libros";
-                    SqlCommand cmd = new SqlCommand(query, conexion);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
+                using SqlConnection conexion = conexionBD.ObtenerConexion();
+                string sql = "SELECT IdLibro, Titulo FROM Libro";
+                SqlDataAdapter da = new(sql, conexion);
+                DataTable dt = new();
+                da.Fill(dt);
 
-                    cmbLibros.DataSource = dt;
-                    cmbLibros.DisplayMember = "Titulo";
-                    cmbLibros.ValueMember = "Id";
-                }
+                cmbLibro.DataSource = dt;
+                cmbLibro.DisplayMember = "Titulo";
+                cmbLibro.ValueMember = "IdLibro";
+                cmbLibro.SelectedIndex = -1;
             }
             catch (Exception ex)
             {
@@ -154,46 +257,144 @@ namespace SistemaBiblioteca.Forms
             }
         }
 
-        private void CargarPrestamosRegistrados()
+        private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            // Aquí puedes conectar luego con tu tabla de préstamos en la BD para listar el historial
-            DataTable dtPrueba = new DataTable();
-            dtPrueba.Columns.Add("ID");
-            dtPrueba.Columns.Add("Usuario");
-            dtPrueba.Columns.Add("Libro");
-            dtPrueba.Columns.Add("Fecha préstamo");
-            dtPrueba.Columns.Add("Fecha devolución");
-            dtPrueba.Columns.Add("Estado");
-
-            // Datos de ejemplo para que veas la tabla idéntica al esquema
-            dtPrueba.Rows.Add("1", "Ana López", "Cien años de soledad", "15/09/2025", "29/09/2025", "Devuelto");
-            dtPrueba.Rows.Add("2", "Carlos Ramírez", "El principito", "20/09/2025", "04/10/2025", "En curso");
-
-            dgvPrestamos.DataSource = dtPrueba;
-        }
-
-        private void BtnRegistrar_Click(object sender, EventArgs e)
-        {
-            if (cmbUsuarios.SelectedValue == null || cmbLibros.SelectedValue == null)
+            if (cmbUsuario.SelectedIndex == -1 || cmbUsuario.SelectedValue == null)
             {
-                MessageBox.Show("Por favor seleccione un usuario y un libro.");
+                MessageBox.Show("Por favor, seleccione un usuario de la lista.");
                 return;
             }
 
-            int idUsuario = Convert.ToInt32(cmbUsuarios.SelectedValue);
-            int idLibro = Convert.ToInt32(cmbLibros.SelectedValue);
-            string fechaP = dtpFechaPrestamo.Value.ToShortDateString();
-            string fechaD = dtpFechaDevolucion.Value.ToShortDateString();
+            if (cmbLibro.SelectedIndex == -1 || cmbLibro.SelectedValue == null)
+            {
+                MessageBox.Show("Por favor, seleccione un libro de la lista.");
+                return;
+            }
 
-            MessageBox.Show($"¡Préstamo registrado con éxito!\nUsuario ID: {idUsuario}\nLibro ID: {idLibro}\nFecha Préstamo: {fechaP}\nFecha Devolución: {fechaD}");
+            int idUsuario = Convert.ToInt32(cmbUsuario.SelectedValue);
+            int idLibro = Convert.ToInt32(cmbLibro.SelectedValue);
+            DateTime fechaPrestamo = dtpFechaPrestamo.Value;
+            DateTime fechaDevolucion = dtpFechaDevolucion.Value;
+
+            try
+            {
+                using SqlConnection conexion = conexionBD.ObtenerConexion();
+                string sql = @"INSERT INTO Prestamos (IdUsuario, IdLibro, FechaPrestamo, FechaDevolucion, Estado) 
+                               VALUES (@IdUsuario, @IdLibro, @FechaPrestamo, @FechaDevolucion, 'En curso')";
+
+                SqlCommand cmd = new(sql, conexion);
+                cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                cmd.Parameters.AddWithValue("@IdLibro", idLibro);
+                cmd.Parameters.AddWithValue("@FechaPrestamo", fechaPrestamo);
+                cmd.Parameters.AddWithValue("@FechaDevolucion", fechaDevolucion);
+
+                conexion.Open();
+                cmd.ExecuteNonQuery();
+
+                MessageBox.Show("¡Préstamo registrado exitosamente!");
+                LimpiarCampos();
+                CargarTablaPrestamos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al registrar préstamo: " + ex.Message);
+            }
         }
 
-        private void BtnLimpiar_Click(object sender, EventArgs e)
+        private void btnBuscar_Click(object sender, EventArgs e)
         {
-            if (cmbUsuarios.Items.Count > 0) cmbUsuarios.SelectedIndex = 0;
-            if (cmbLibros.Items.Count > 0) cmbLibros.SelectedIndex = 0;
-            dtpFechaPrestamo.Value = DateTime.Now;
-            dtpFechaDevolucion.Value = DateTime.Now.AddDays(14);
+            string criterio = cmbBuscarPor.SelectedItem?.ToString() ?? "Usuario";
+            string textoBusqueda = txtBuscar.Text.Trim();
+
+            try
+            {
+                using SqlConnection conexion = conexionBD.ObtenerConexion();
+                string sql = @"SELECT P.IdPrestamo AS ID, 
+                                     U.Nombre + ' ' + ISNULL(U.Apellido, '') AS Usuario, 
+                                     L.Titulo AS Libro, 
+                                     P.FechaPrestamo AS [Fecha préstamo], 
+                                     P.FechaDevolucion AS [Fecha devolución], 
+                                     P.Estado 
+                              FROM Prestamos P
+                              INNER JOIN Usuarios U ON P.IdUsuario = U.IdUsuario
+                              INNER JOIN Libro L ON P.IdLibro = L.IdLibro
+                              WHERE ";
+
+                if (criterio == "Usuario")
+                {
+                    sql += "(U.Nombre LIKE @filtro OR U.Apellido LIKE @filtro)";
+                }
+                else if (criterio == "Libro")
+                {
+                    sql += "L.Titulo LIKE @filtro";
+                }
+                else
+                {
+                    sql += "P.Estado LIKE @filtro";
+                }
+
+                sql += " ORDER BY P.IdPrestamo DESC";
+
+                SqlCommand cmd = new(sql, conexion);
+                cmd.Parameters.AddWithValue("@filtro", "%" + textoBusqueda + "%");
+
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
+                da.Fill(dt);
+                dgvPrestamos.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al buscar préstamos: " + ex.Message);
+            }
+        }
+
+        private void btnVerTodos_Click(object sender, EventArgs e)
+        {
+            txtBuscar.Clear();
+            CargarTablaPrestamos();
+        }
+
+        private void CargarTablaPrestamos()
+        {
+            try
+            {
+                using SqlConnection conexion = conexionBD.ObtenerConexion();
+                string sql = @"SELECT P.IdPrestamo AS ID, 
+                                     U.Nombre + ' ' + ISNULL(U.Apellido, '') AS Usuario, 
+                                     L.Titulo AS Libro, 
+                                     P.FechaPrestamo AS [Fecha préstamo], 
+                                     P.FechaDevolucion AS [Fecha devolución], 
+                                     P.Estado 
+                              FROM Prestamos P
+                              INNER JOIN Usuarios U ON P.IdUsuario = U.IdUsuario
+                              INNER JOIN Libro L ON P.IdLibro = L.IdLibro
+                              ORDER BY P.IdPrestamo DESC";
+
+                SqlDataAdapter da = new(sql, conexion);
+                DataTable dt = new();
+                da.Fill(dt);
+                dgvPrestamos.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar la lista de préstamos: " + ex.Message);
+            }
+        }
+
+        private void LimpiarCampos()
+        {
+            if (cmbUsuario != null && cmbUsuario.Items.Count > 0) cmbUsuario.SelectedIndex = -1;
+            if (cmbLibro != null && cmbLibro.Items.Count > 0) cmbLibro.SelectedIndex = -1;
+            if (dtpFechaPrestamo != null) dtpFechaPrestamo.Value = DateTime.Now;
+            if (dtpFechaDevolucion != null) dtpFechaDevolucion.Value = DateTime.Now.AddDays(7);
+            if (txtBuscar != null) txtBuscar.Clear();
+        }
+
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            LimpiarCampos();
+            CargarTablaPrestamos();
         }
     }
 }
