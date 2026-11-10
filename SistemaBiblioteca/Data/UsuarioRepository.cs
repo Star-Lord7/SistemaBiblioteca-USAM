@@ -142,11 +142,18 @@ namespace SistemaBiblioteca.Data
             }
         }
 
+
         public void RegistrarUsuario(Usuario usuario)
         {
             using (SqlConnection conexion = conexionBD.ObtenerConexion())
             {
-                string consulta = @"
+                conexion.Open();
+
+                using (SqlTransaction transaccion = conexion.BeginTransaction())
+                {
+                    try
+                    {
+                        string sqlUsuario = @"
                     INSERT INTO dbo.Usuarios
                     (
                         Nombre,
@@ -155,6 +162,7 @@ namespace SistemaBiblioteca.Data
                         PasswordHash,
                         IdRol
                     )
+                    OUTPUT INSERTED.IdUsuario
                     VALUES
                     (
                         @Nombre,
@@ -164,20 +172,93 @@ namespace SistemaBiblioteca.Data
                         @IdRol
                     )";
 
-                using (SqlCommand comando = new SqlCommand(consulta, conexion))
-                {
-                    comando.Parameters.AddWithValue("@Nombre", usuario.Nombre);
-                    comando.Parameters.AddWithValue("@Apellido", usuario.Apellido);
-                    comando.Parameters.AddWithValue("@Correo", usuario.Correo);
-                    comando.Parameters.AddWithValue(
-                        "@PasswordHash", usuario.PasswordHash);
-                    comando.Parameters.AddWithValue("@IdRol", usuario.IdRol);
+                        int idUsuario;
 
-                    conexion.Open();
-                    comando.ExecuteNonQuery();
+                        using (SqlCommand comando = new SqlCommand(
+                            sqlUsuario, conexion, transaccion))
+                        {
+                            comando.Parameters.AddWithValue("@Nombre", usuario.Nombre);
+                            comando.Parameters.AddWithValue("@Apellido", usuario.Apellido);
+                            comando.Parameters.AddWithValue("@Correo", usuario.Correo);
+                            comando.Parameters.AddWithValue("@PasswordHash", usuario.PasswordHash);
+                            comando.Parameters.AddWithValue("@IdRol", usuario.IdRol);
+
+                            idUsuario = Convert.ToInt32(comando.ExecuteScalar());
+                        }
+
+                        string sqlRol = @"
+                    SELECT NombreRol
+                    FROM dbo.Roles
+                    WHERE IdRol = @IdRol";
+
+                        string nombreRol;
+
+                        using (SqlCommand comando = new SqlCommand(
+                            sqlRol, conexion, transaccion))
+                        {
+                            comando.Parameters.AddWithValue("@IdRol", usuario.IdRol);
+
+                            nombreRol = Convert.ToString(
+                                comando.ExecuteScalar());
+                        }
+
+                        if (nombreRol == "Usuario")
+                        {
+                            // Generar un número de tarjeta de 5 dígitos basado en el IdUsuario
+                            if (idUsuario > 99999)
+                            {
+                                throw new Exception(
+                                    "No se pueden generar más tarjetas de 5 dígitos.");
+                            }
+
+                            string numeroTarjeta = idUsuario.ToString("D5");
+
+                            string sqlLector = @"
+                        INSERT INTO dbo.Lector
+                        (
+                            Num_Tarjeta,
+                            Nombre_Lector,
+                            Direccion_Lector,
+                            Telefono_Lector,
+                            IdUsuario
+                        )
+                        VALUES
+                        (
+                            @NumTarjeta,
+                            @NombreLector,
+                            NULL,
+                            NULL,
+                            @IdUsuario
+                        )";
+
+                            using (SqlCommand comando = new SqlCommand(
+                                sqlLector, conexion, transaccion))
+                            {
+                                comando.Parameters.AddWithValue(
+                                    "@NumTarjeta", numeroTarjeta);
+
+                                comando.Parameters.AddWithValue(
+                                    "@NombreLector",
+                                    usuario.Nombre + " " + usuario.Apellido);
+
+                                comando.Parameters.AddWithValue(
+                                    "@IdUsuario", idUsuario);
+
+                                comando.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaccion.Commit();
+                    }
+                    catch
+                    {
+                        transaccion.Rollback();
+                        throw;
+                    }
                 }
             }
         }
+
 
         public void ActualizarUsuario(Usuario usuario)
         {

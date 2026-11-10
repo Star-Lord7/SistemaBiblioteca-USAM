@@ -5,17 +5,21 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
 using SistemaBiblioteca.Data;
+using SistemaBiblioteca.Services;
 
 namespace SistemaBiblioteca.Forms
 {
     public partial class PrestamosForm : Form
     {
         private readonly ConexionBD conexionBD = new();
+        private readonly PrestamoService prestamoService =
+    new PrestamoService();
 
         // --- DEFINICIÓN DE CONTROLES (ESTO FALTABA) ---
         // Controles para Registrar Préstamo
         private ComboBox cmbUsuario;
         private ComboBox cmbLibro;
+        private ComboBox cmbSucursal;
         private DateTimePicker dtpFechaPrestamo;
         private DateTimePicker dtpFechaDevolucion;
         private Button btnRegistrar;
@@ -32,11 +36,14 @@ namespace SistemaBiblioteca.Forms
 
         public PrestamosForm()
         {
+            InitializeComponent();
             // El orden es importante:
             ConstruirInterfazPorCodigo(); // 1. Crea y posiciona los controles
             CargarUsuarios();            // 2. Llena el ComboBox de usuarios
-            CargarLibros();              // 3. Llena el ComboBox de libros
+            CargarLibros();
+            CargarSucursales();// 3. Llena el ComboBox de libros
             CargarTablaPrestamos();      // 4. Llena la tabla con los préstamos actuales
+            LimpiarCampos();
         }
 
         // --- MÉTODOS QUE FALTABAN ---
@@ -45,9 +52,11 @@ namespace SistemaBiblioteca.Forms
         {
             Text = "Sistema de Biblioteca - Gestión de Préstamos";
             BackColor = Color.White;
-            Width = 985;
-            Height = 580;
-            StartPosition = FormStartPosition.CenterScreen;
+            Size = new Size(907, 712);
+            Dock = DockStyle.Fill;
+            FormBorderStyle = FormBorderStyle.None;
+            //BackColor = Color.WhiteSmoke;
+            AutoScroll = true;
 
             // ==========================================
             // PANEL IZQUIERDO: REGISTRAR PRÉSTAMO
@@ -55,8 +64,8 @@ namespace SistemaBiblioteca.Forms
             GroupBox gbRegistrar = new GroupBox
             {
                 Text = "Registrar préstamo",
-                Location = new Point(20, 15),
-                Size = new Size(465, 165),
+                Location = new Point(15, 15),
+                Size = new Size(425, 220),
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
             };
 
@@ -66,16 +75,32 @@ namespace SistemaBiblioteca.Forms
             Label lblLibro = new Label { Text = "Libro:", Location = new Point(15, 67), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
             cmbLibro = new ComboBox { Location = new Point(130, 64), Width = 315, DropDownStyle = ComboBoxStyle.DropDownList };
 
-            Label lblFPrestamo = new Label { Text = "Fecha préstamo:", Location = new Point(15, 102), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
-            dtpFechaPrestamo = new DateTimePicker { Location = new Point(130, 99), Width = 180, Format = DateTimePickerFormat.Short };
+            Label lblSucursal = new Label
+            {
+                Text = "Sucursal:",
+                Location = new Point(15, 102),
+                AutoSize = true
+            };
 
-            Label lblFDevolucion = new Label { Text = "Fecha devolución:", Location = new Point(15, 134), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
-            dtpFechaDevolucion = new DateTimePicker { Location = new Point(130, 131), Width = 180, Format = DateTimePickerFormat.Short };
+            cmbSucursal = new ComboBox
+            {
+                Location = new Point(130, 99),
+                Width = 270,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+
+            Label lblFPrestamo = new Label { Text = "Fecha préstamo:", Location = new Point(15, 139), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            dtpFechaPrestamo = new DateTimePicker { Location = new Point(130, 136), Width = 180, Format = DateTimePickerFormat.Short };
+
+            Label lblFDevolucion = new Label { Text = "Fecha devolución:", Location = new Point(15, 176), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Regular) };
+            dtpFechaDevolucion = new DateTimePicker { Location = new Point(130, 173), Width = 180, Format = DateTimePickerFormat.Short };
 
             gbRegistrar.Controls.Add(lblUsuario);
             gbRegistrar.Controls.Add(cmbUsuario);
             gbRegistrar.Controls.Add(lblLibro);
             gbRegistrar.Controls.Add(cmbLibro);
+            gbRegistrar.Controls.Add(lblSucursal);
+            gbRegistrar.Controls.Add(cmbSucursal);
             gbRegistrar.Controls.Add(lblFPrestamo);
             gbRegistrar.Controls.Add(dtpFechaPrestamo);
             gbRegistrar.Controls.Add(lblFDevolucion);
@@ -88,8 +113,8 @@ namespace SistemaBiblioteca.Forms
             GroupBox gbBuscar = new GroupBox
             {
                 Text = "Buscar préstamo",
-                Location = new Point(500, 15),
-                Size = new Size(445, 165),
+                Location = new Point(455, 15),
+                Size = new Size(425, 220),
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
             };
 
@@ -121,8 +146,8 @@ namespace SistemaBiblioteca.Forms
             // ==========================================
             // BOTONES PRINCIPALES DE ACCIÓN
             // ==========================================
-            btnRegistrar = new Button { Text = "Registrar préstamo", Location = new Point(20, 192), Width = 150, Height = 35, BackColor = Color.FromArgb(0, 120, 215), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            btnLimpiar = new Button { Text = "Limpiar", Location = new Point(180, 192), Width = 90, Height = 35, FlatStyle = FlatStyle.Standard };
+            btnRegistrar = new Button { Text = "Registrar préstamo", Location = new Point(15, 250), Width = 150, Height = 35, BackColor = Color.FromArgb(0, 120, 215), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnLimpiar = new Button { Text = "Limpiar", Location = new Point(190, 250), Width = 90, Height = 35, FlatStyle = FlatStyle.Standard };
 
             // Aquí conectamos los eventos para los botones principales
             btnRegistrar.Click += new EventHandler(this.btnRegistrar_Click);
@@ -132,8 +157,13 @@ namespace SistemaBiblioteca.Forms
             // ==========================================
             // TABLA: PRÉSTAMOS REGISTRADOS
             // ==========================================
-            Label lblTituloTabla = new Label { Text = "Préstamos registrados", Location = new Point(20, 240), Font = new Font("Segoe UI", 11, FontStyle.Bold), AutoSize = true };
-            dgvPrestamos = new DataGridView { Location = new Point(20, 275), Size = new Size(925, 245), ReadOnly = true, SelectionMode = DataGridViewSelectionMode.FullRowSelect, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            Label lblTituloTabla = new Label { Text = "Préstamos registrados", Location = new Point(15, 310), Font = new Font("Segoe UI", 11, FontStyle.Bold), AutoSize = true };
+            dgvPrestamos = new DataGridView { Location = new Point(15, 345), Size = new Size(865, 340), ReadOnly = true, SelectionMode = DataGridViewSelectionMode.FullRowSelect, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            dgvPrestamos.Anchor =
+    AnchorStyles.Top |
+    AnchorStyles.Bottom |
+    AnchorStyles.Left |
+    AnchorStyles.Right;
             EstilizarTablaPrestamos();
 
             // Agregar controles al formulario
@@ -170,31 +200,47 @@ namespace SistemaBiblioteca.Forms
 
         private void CargarUsuarios()
         {
-            // Lógica para cargar usuarios desde la base de datos a cmbUsuario
-            // (Similar a CargarTablaPrestamos, pero para el ComboBox)
+            cmbUsuario.DataSource = prestamoService.ObtenerLectores();
+            cmbUsuario.DisplayMember = "Nombre_Lector";
+            cmbUsuario.ValueMember = "Num_Tarjeta";
+            cmbUsuario.SelectedIndex = -1;
         }
 
         private void CargarLibros()
         {
-            // Lógica para cargar libros desde la base de datos a cmbLibro
-            // (Similar a CargarTablaPrestamos, pero para el ComboBox)
+            cmbLibro.DataSource = null;
+
+            cmbLibro.DisplayMember = "Titulo";
+            cmbLibro.ValueMember = "Id_Libro";
+
+            cmbLibro.DataSource = prestamoService.ObtenerLibros();
+
+            cmbLibro.SelectedIndex = -1;
+        }
+
+        private void CargarSucursales()
+        {
+            cmbSucursal.DataSource = null;
+
+            cmbSucursal.DisplayMember = "Nombre_Sucursal";
+            cmbSucursal.ValueMember = "Id_Sucursal";
+
+            cmbSucursal.DataSource = prestamoService.ObtenerSucursales();
+
+            cmbSucursal.SelectedIndex = -1;
         }
 
         private void CargarTablaPrestamos()
         {
             try
             {
-                using SqlConnection conexion = conexionBD.ObtenerConexion();
-                conexion.Open();
-                string sql = "SELECT * FROM Prestamos"; // Reemplaza por tu consulta real con JOINS
-                SqlDataAdapter da = new SqlDataAdapter(sql, conexion);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvPrestamos.DataSource = dt;
+                dgvPrestamos.DataSource =
+                    prestamoService.ObtenerPrestamos();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al cargar préstamos: " + ex.Message);
+                MessageBox.Show(
+                    "Error al cargar préstamos: " + ex.Message);
             }
         }
 
@@ -202,17 +248,54 @@ namespace SistemaBiblioteca.Forms
         {
             cmbUsuario.SelectedIndex = -1;
             cmbLibro.SelectedIndex = -1;
-            dtpFechaPrestamo.Value = DateTime.Now;
-            dtpFechaDevolucion.Value = DateTime.Now.AddDays(7); // Fecha de devolución por defecto a una semana
-            if (txtBuscar != null) txtBuscar.Clear();
+            cmbSucursal.SelectedIndex = -1;
+
+            dtpFechaPrestamo.Value = DateTime.Today;
+            dtpFechaDevolucion.Value = DateTime.Today.AddDays(7);
+
+            txtBuscar.Clear();
         }
 
         // --- MANEJADORES DE EVENTOS DE CLIC ---
 
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            // Implementar lógica para registrar el préstamo en la base de datos
-            MessageBox.Show("Lógica para registrar préstamo no implementada aún.");
+            try
+            {
+                if (cmbUsuario.SelectedIndex == -1 ||
+                    cmbLibro.SelectedIndex == -1 ||
+                    cmbSucursal.SelectedIndex == -1)
+                {
+                    MessageBox.Show(
+                        "Seleccione un lector, un libro y una sucursal.");
+                    return;
+                }
+
+                prestamoService.RegistrarPrestamo(
+                    Convert.ToInt32(cmbLibro.SelectedValue),
+                    Convert.ToInt32(cmbSucursal.SelectedValue),
+                    cmbUsuario.SelectedValue.ToString(),
+                    dtpFechaPrestamo.Value.Date,
+                    dtpFechaDevolucion.Value.Date
+                );
+
+                MessageBox.Show(
+                    "Préstamo registrado correctamente.",
+                    "Registro exitoso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                CargarTablaPrestamos();
+                LimpiarCampos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Error al registrar préstamo",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e)
@@ -222,14 +305,56 @@ namespace SistemaBiblioteca.Forms
 
         private void btnBuscar_Click(object sender, EventArgs e)
         {
-            // Implementar lógica de búsqueda y filtrado de préstamos
-            MessageBox.Show("Lógica para buscar préstamos no implementada aún.");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtBuscar.Text))
+                {
+                    CargarTablaPrestamos();
+                    return;
+                }
+
+                string criterio = cmbBuscarPor.Text;
+
+                if (criterio == "Estado")
+                {
+                    MessageBox.Show(
+                        "La búsqueda por estado estará disponible cuando se implemente el control de devoluciones.");
+                    return;
+                }
+
+                dgvPrestamos.DataSource =
+                    prestamoService.BuscarPrestamos(
+                        criterio,
+                        txtBuscar.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Error al buscar préstamos: " + ex.Message);
+            }
+        }
+
+        private void InitializeComponent()
+        {
+            SuspendLayout();
+            // 
+            // PrestamosForm
+            // 
+            ClientSize = new Size(282, 253);
+            Name = "PrestamosForm";
+            ResumeLayout(false);
+
         }
 
         private void btnVerTodos_Click(object sender, EventArgs e)
         {
             txtBuscar.Clear();
             CargarTablaPrestamos();
+        }
+
+        private void PrestamosForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
